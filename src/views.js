@@ -1,6 +1,6 @@
 /**
- * Clean, modern, distraction-free HTML Views for s.ten.my.id
- * Pure Vanilla CSS & JS, no external framework dependencies.
+ * Clean, modern, mobile-first HTML Views for s.ten.my.id
+ * Pure Vanilla CSS & JS, fully responsive for desktop & mobile.
  */
 
 const BASE_STYLES = `
@@ -38,9 +38,10 @@ const BASE_STYLES = `
     line-height: 1.5;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  input, button, select {
+  input, button, select, textarea {
     font-family: inherit;
     font-size: 0.95rem;
   }
@@ -48,6 +49,13 @@ const BASE_STYLES = `
   button {
     cursor: pointer;
     transition: all 0.15s ease;
+  }
+
+  /* Prevent auto zoom on iOS Safari */
+  @media (max-width: 768px) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
   }
 
   /* Toast Notification */
@@ -81,10 +89,23 @@ const BASE_STYLES = `
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  @media (max-width: 640px) {
+    #toast-container {
+      left: 14px;
+      right: 14px;
+      bottom: 86px;
+    }
+    .toast {
+      width: 100%;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+  }
 `;
 
 /**
- * Render Login Page
+ * Render Login / Setup Page
  */
 export function renderLoginPage({ error = '', domain = 's.ten.my.id', isConfigured = true }) {
   const isSetup = !isConfigured;
@@ -97,7 +118,7 @@ export function renderLoginPage({ error = '', domain = 's.ten.my.id', isConfigur
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>${title} - ${domain}</title>
   <style>
     ${BASE_STYLES}
@@ -105,7 +126,7 @@ export function renderLoginPage({ error = '', domain = 's.ten.my.id', isConfigur
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
     }
     .login-container {
       width: 100%;
@@ -113,7 +134,7 @@ export function renderLoginPage({ error = '', domain = 's.ten.my.id', isConfigur
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
-      padding: 32px 28px;
+      padding: 30px 24px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
     .brand {
@@ -169,7 +190,7 @@ export function renderLoginPage({ error = '', domain = 's.ten.my.id', isConfigur
       background: var(--bg-input);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 10px 12px;
+      padding: 11px 12px;
       border-radius: var(--radius-sm);
       outline: none;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -184,9 +205,10 @@ export function renderLoginPage({ error = '', domain = 's.ten.my.id', isConfigur
       color: #0b1120;
       font-weight: 600;
       border: none;
-      padding: 11px;
+      padding: 12px;
       border-radius: var(--radius-sm);
       margin-top: 8px;
+      font-size: 0.95rem;
     }
     .btn-submit:hover {
       background: var(--accent-hover);
@@ -295,7 +317,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Admin Dashboard - ${domain}</title>
   <style>
     ${BASE_STYLES}
@@ -311,7 +333,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
     .navbar-inner {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 12px 20px;
+      padding: 12px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -343,7 +365,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .user-pill {
       background: var(--bg-input);
@@ -357,7 +379,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       background: transparent;
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      padding: 5px 12px;
+      padding: 6px 12px;
       border-radius: var(--radius-sm);
       font-size: 0.82rem;
     }
@@ -367,11 +389,12 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       border-color: var(--danger);
     }
 
-    /* Layout */
+    /* Layout Container */
     .container {
       max-width: 1100px;
-      margin: 24px auto;
-      padding: 0 20px;
+      margin: 20px auto;
+      padding: 0 16px;
+      padding-bottom: 90px; /* Space for mobile floating button */
     }
 
     /* Buttons */
@@ -454,7 +477,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       color: var(--text-muted);
       padding: 0 12px;
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-      font-size: 0.9rem;
+      font-size: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -464,13 +487,13 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       color: #fff;
     }
 
-    /* Toolbar */
+    /* Toolbar: Search, Filters, Stats */
     .toolbar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 12px;
       margin-bottom: 16px;
     }
     .toolbar-left {
@@ -483,7 +506,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
     .toolbar-right {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
     }
     .search-box {
       min-width: 240px;
@@ -510,9 +533,16 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
     }
     .cat-filters {
       display: flex;
-      flex-wrap: wrap;
       gap: 6px;
       align-items: center;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .cat-filters::-webkit-scrollbar {
+      display: none;
     }
     .cat-pill {
       background: var(--bg-surface);
@@ -522,6 +552,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       border-radius: 20px;
       font-size: 0.8rem;
       cursor: pointer;
+      flex-shrink: 0;
     }
     .cat-pill:hover {
       background: var(--bg-surface-hover);
@@ -537,15 +568,16 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       font-size: 0.82rem;
       color: var(--text-dim);
       display: flex;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
+      white-space: nowrap;
     }
     .stats-highlight {
       color: var(--text-muted);
       font-weight: 600;
     }
 
-    /* Table / List */
+    /* Desktop Table View */
     .table-container {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
@@ -596,10 +628,11 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       background: transparent;
       border: none;
       color: var(--text-dim);
-      padding: 4px;
+      padding: 6px;
       border-radius: 4px;
       display: flex;
       align-items: center;
+      justify-content: center;
     }
     .btn-copy-icon:hover {
       color: var(--text-main);
@@ -612,6 +645,11 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       text-overflow: ellipsis;
       white-space: nowrap;
       display: block;
+      text-decoration: none;
+    }
+    .dest-url:hover {
+      color: var(--text-main);
+      text-decoration: underline;
     }
     .category-badge {
       display: inline-block;
@@ -645,9 +683,9 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       background: transparent;
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      padding: 4px 8px;
+      padding: 5px 10px;
       border-radius: var(--radius-sm);
-      font-size: 0.78rem;
+      font-size: 0.8rem;
     }
     .btn-action:hover {
       background: var(--bg-surface-hover);
@@ -659,10 +697,126 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       background: var(--danger-bg);
     }
 
+    /* Mobile Cards View */
+    .mobile-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .link-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .card-slug-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-slug-group .short-link-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .card-badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-url-row {
+      font-size: 0.84rem;
+      line-height: 1.4;
+      word-break: break-all;
+    }
+    .card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+      gap: 8px;
+    }
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Responsive Views Toggle */
+    @media (min-width: 769px) {
+      .desktop-only { display: block !important; }
+      .mobile-only { display: none !important; }
+      .mobile-fab { display: none !important; }
+    }
+    @media (max-width: 768px) {
+      .desktop-only { display: none !important; }
+      .mobile-only { display: block !important; }
+      
+      .container {
+        margin: 14px auto;
+        padding: 0 12px 100px 12px;
+      }
+      .navbar-inner {
+        padding: 10px 14px;
+      }
+      .user-pill {
+        display: none; /* Hide long email pill on mobile */
+      }
+      .btn-nav-create {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+      }
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .toolbar-left {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      .search-box {
+        min-width: 100%;
+        width: 100%;
+      }
+      .toolbar-right {
+        justify-content: space-between;
+        padding: 0 2px;
+      }
+      .mobile-fab {
+        display: flex !important;
+        position: fixed;
+        bottom: 22px;
+        right: 18px;
+        z-index: 99;
+        background: linear-gradient(135deg, #0284c7, #6366f1);
+        color: #fff;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        box-shadow: 0 10px 25px rgba(2, 132, 199, 0.5);
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
     /* Empty state */
     .empty-state {
       text-align: center;
-      padding: 48px 20px;
+      padding: 42px 16px;
       color: var(--text-dim);
     }
     .empty-icon {
@@ -680,7 +834,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
     }
     .modal-backdrop.open {
       display: flex;
@@ -692,6 +846,8 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       padding: 24px;
       width: 100%;
       max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
       box-shadow: 0 25px 50px rgba(0,0,0,0.5);
       animation: modal-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
@@ -703,7 +859,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .modal-title {
       font-size: 1.15rem;
@@ -714,9 +870,9 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       background: transparent;
       border: none;
       color: var(--text-dim);
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       line-height: 1;
-      padding: 2px 6px;
+      padding: 4px 8px;
       border-radius: 4px;
     }
     .btn-close:hover { color: var(--text-main); background: var(--bg-surface-hover); }
@@ -724,13 +880,13 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
-      margin-top: 24px;
+      margin-top: 22px;
     }
     .btn-secondary {
       background: transparent;
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      padding: 8px 14px;
+      padding: 9px 14px;
       border-radius: var(--radius-sm);
     }
     .btn-secondary:hover { background: var(--bg-surface-hover); color: var(--text-main); }
@@ -740,9 +896,9 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       background: var(--bg-input);
       border: 1px solid var(--border-color);
       color: var(--text-muted);
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 14px;
+      font-size: 0.78rem;
       cursor: pointer;
       user-select: none;
     }
@@ -765,6 +921,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       padding: 12px;
       border-radius: var(--radius-md);
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      max-width: 80vw;
     }
   </style>
 </head>
@@ -779,9 +936,9 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
         <div class="brand-name">${domain}</div>
       </a>
       <div class="nav-actions">
-        <button id="btn-nav-create" class="btn-primary" onclick="openCreateModal()">
+        <button id="btn-nav-create" class="btn-primary btn-nav-create" onclick="openCreateModal()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          + Buat Shortlink
+          <span>+ Buat Shortlink</span>
         </button>
         <span class="user-pill">${userEmail || 'Admin'}</span>
         <button id="btn-logout" class="btn-logout" title="Keluar">Keluar</button>
@@ -805,13 +962,14 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       <div class="toolbar-right">
         <div class="stats-info">
           <span>Total: <span id="stat-total" class="stats-highlight">0</span></span>
+          <span>•</span>
           <span>Klik: <span id="stat-clicks" class="stats-highlight">0</span></span>
         </div>
       </div>
     </div>
 
-    <!-- Links Table -->
-    <div class="table-container">
+    <!-- Desktop Table View (>= 769px) -->
+    <div class="table-container desktop-only">
       <table>
         <thead>
           <tr>
@@ -833,6 +991,20 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
         </tbody>
       </table>
     </div>
+
+    <!-- Mobile Cards View (< 769px) -->
+    <div id="mobile-cards-list" class="mobile-cards-list mobile-only">
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <div>Memuat data shortlink...</div>
+      </div>
+    </div>
+
+    <!-- Mobile Floating Action Button (FAB) -->
+    <button id="mobile-fab" class="mobile-fab" onclick="openCreateModal()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>+ Shortlink</span>
+    </button>
   </main>
 
   <!-- Create Modal (Popup Form) -->
@@ -841,7 +1013,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       <div class="modal-header">
         <div>
           <h3 class="modal-title">Buat Shortlink Baru</h3>
-          <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 2px;">Format tautan: ${domain}/[slug]</div>
+          <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 2px;">Format: ${domain}/[slug]</div>
         </div>
         <button type="button" class="btn-close" onclick="closeCreateModal()">&times;</button>
       </div>
@@ -872,12 +1044,12 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
           <label for="modal-input-category">Kategori <span style="font-weight: normal; color: var(--text-dim);">(Opsional)</span></label>
           <input type="text" id="modal-input-category" list="category-list" class="input-field" placeholder="Contoh: CDN, Asset, Social, Dokumen" autocomplete="off">
           <datalist id="category-list"></datalist>
-          <div id="quick-category-chips" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;"></div>
+          <div id="quick-category-chips" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;"></div>
         </div>
 
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeCreateModal()">Batal</button>
-          <button type="submit" id="btn-submit-modal-create" class="btn-primary">+ Buat Shortlink</button>
+          <button type="submit" id="btn-submit-modal-create" class="btn-primary" style="padding: 10px 18px;">+ Buat Shortlink</button>
         </div>
       </form>
     </div>
@@ -905,7 +1077,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
         </div>
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeEditModal()">Batal</button>
-          <button type="submit" id="btn-save-edit" class="btn-primary">Simpan</button>
+          <button type="submit" id="btn-save-edit" class="btn-primary" style="padding: 10px 18px;">Simpan</button>
         </div>
       </form>
     </div>
@@ -919,7 +1091,8 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
         <button type="button" class="btn-close" onclick="closeQrModal()">&times;</button>
       </div>
       <div id="qr-container"></div>
-      <div class="modal-actions" style="justify-content: center;">
+      <div class="modal-actions" style="justify-content: center; gap: 8px;">
+        <button type="button" class="btn-primary" id="btn-qr-copy">📋 Salin Link</button>
         <button type="button" class="btn-secondary" onclick="closeQrModal()">Tutup</button>
       </div>
     </div>
@@ -931,6 +1104,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
     let allLinks = [];
     let activeCategory = 'ALL';
     let searchQuery = '';
+    let currentQrUrl = '';
 
     // Show Toast
     function showToast(message, type = 'success') {
@@ -1051,10 +1225,12 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       }
     }
 
-    // Render Table
+    // Render Table (Desktop) & Cards (Mobile)
     function renderTable() {
       const tbody = document.getElementById('links-tbody');
+      const mobileList = document.getElementById('mobile-cards-list');
       tbody.innerHTML = '';
+      mobileList.innerHTML = '';
 
       const filtered = allLinks.filter(item => {
         if (activeCategory !== 'ALL' && (item.category || 'Umum') !== activeCategory) {
@@ -1071,55 +1247,99 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = \`
-          <tr>
-            <td colspan="6" class="empty-state">
-              <div class="empty-icon">🔗</div>
-              <div>Belum ada shortlink \${searchQuery || activeCategory !== 'ALL' ? 'yang sesuai filter' : 'dibuat'}.</div>
-            </td>
-          </tr>
+        const emptyHtml = \`
+          <div class="empty-state">
+            <div class="empty-icon">🔗</div>
+            <div>Belum ada shortlink \${searchQuery || activeCategory !== 'ALL' ? 'yang sesuai filter' : 'dibuat'}.</div>
+          </div>
         \`;
+        tbody.innerHTML = \`<tr><td colspan="6">\${emptyHtml}</td></tr>\`;
+        mobileList.innerHTML = emptyHtml;
         return;
       }
 
       for (const link of filtered) {
         const fullShortUrl = 'https://' + DOMAIN + '/' + link.slug;
+        const escSlug = escapeHtml(link.slug);
+        const escUrl = escapeHtml(link.url);
+        const escCat = escapeHtml(link.category || 'Umum');
+        const clicks = link.clicks || 0;
+        const formattedDate = formatDate(link.createdAt);
+
+        // 1. Desktop Table Row
         const tr = document.createElement('tr');
         tr.innerHTML = \`
           <td>
             <div class="short-link-cell">
-              <a href="\${fullShortUrl}" target="_blank" class="short-link-text">/\${escapeHtml(link.slug)}</a>
+              <a href="\${fullShortUrl}" target="_blank" class="short-link-text">/\${escSlug}</a>
               <button class="btn-copy-icon" title="Salin Shortlink" onclick="copyToClipboard('\${fullShortUrl}')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               </button>
             </div>
           </td>
           <td>
-            <a href="\${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="dest-url" title="\${escapeHtml(link.url)}">
-              \${escapeHtml(link.url)}
+            <a href="\${escUrl}" target="_blank" rel="noopener noreferrer" class="dest-url" title="\${escUrl}">
+              \${escUrl}
             </a>
           </td>
           <td>
-            <span class="category-badge">\${escapeHtml(link.category || 'Umum')}</span>
+            <span class="category-badge">\${escCat}</span>
           </td>
           <td>
             <span class="clicks-badge">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              \${link.clicks || 0}
+              \${clicks}
             </span>
           </td>
           <td>
-            <span class="date-text">\${formatDate(link.createdAt)}</span>
+            <span class="date-text">\${formattedDate}</span>
           </td>
           <td>
             <div class="actions-cell">
-              <button class="btn-action" title="QR Code" onclick="showQrModal('\${escapeHtml(link.slug)}', '\${fullShortUrl}')">QR</button>
-              <button class="btn-action" title="Edit" onclick="openEditModal('\${escapeHtml(link.slug)}', '\${escapeHtml(link.url)}', '\${escapeHtml(link.category || 'Umum')}')">Edit</button>
-              <button class="btn-action delete" title="Hapus" onclick="deleteLink('\${escapeHtml(link.slug)}')">Hapus</button>
+              <button class="btn-action" title="QR Code" onclick="showQrModal('\${escSlug}', '\${fullShortUrl}')">QR</button>
+              <button class="btn-action" title="Edit" onclick="openEditModal('\${escSlug}', '\${escUrl}', '\${escCat}')">Edit</button>
+              <button class="btn-action delete" title="Hapus" onclick="deleteLink('\${escSlug}')">Hapus</button>
             </div>
           </td>
         \`;
         tbody.appendChild(tr);
+
+        // 2. Mobile Responsive Card
+        const card = document.createElement('div');
+        card.className = 'link-card';
+        card.innerHTML = \`
+          <div class="card-top">
+            <div class="card-slug-group">
+              <a href="\${fullShortUrl}" target="_blank" class="short-link-text">/\${escSlug}</a>
+              <button class="btn-copy-icon" title="Salin Shortlink" onclick="copyToClipboard('\${fullShortUrl}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <div class="card-badges">
+              <span class="category-badge">\${escCat}</span>
+              <span class="clicks-badge">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                \${clicks}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-url-row">
+            <a href="\${escUrl}" target="_blank" rel="noopener noreferrer" class="dest-url" title="\${escUrl}">
+              \${escUrl}
+            </a>
+          </div>
+
+          <div class="card-bottom">
+            <span class="date-text">\${formattedDate}</span>
+            <div class="card-actions">
+              <button class="btn-action" onclick="showQrModal('\${escSlug}', '\${fullShortUrl}')">QR</button>
+              <button class="btn-action" onclick="openEditModal('\${escSlug}', '\${escUrl}', '\${escCat}')">Edit</button>
+              <button class="btn-action delete" onclick="deleteLink('\${escSlug}')">Hapus</button>
+            </div>
+          </div>
+        \`;
+        mobileList.appendChild(card);
       }
     }
 
@@ -1355,6 +1575,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
 
     // QR Code Modal
     function showQrModal(slug, fullUrl) {
+      currentQrUrl = fullUrl;
       document.getElementById('qr-title').textContent = '/' + slug;
       const container = document.getElementById('qr-container');
       container.innerHTML = '';
@@ -1368,6 +1589,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       const linkText = document.createElement('div');
       linkText.style.fontSize = '0.85rem';
       linkText.style.color = 'var(--text-muted)';
+      linkText.style.wordBreak = 'break-all';
       linkText.textContent = fullUrl;
 
       container.appendChild(qrImg);
@@ -1377,6 +1599,12 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
     function closeQrModal() {
       document.getElementById('qr-modal').classList.remove('open');
     }
+
+    document.getElementById('btn-qr-copy').addEventListener('click', () => {
+      if (currentQrUrl) {
+        copyToClipboard(currentQrUrl);
+      }
+    });
 
     // Close modals with Escape key or clicking backdrop
     window.addEventListener('keydown', (e) => {
@@ -1422,7 +1650,7 @@ export function renderNotFoundPage({ slug = '', domain = 's.ten.my.id' }) {
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>404 - Tautan Tidak Ditemukan</title>
   <style>
     ${BASE_STYLES}
@@ -1436,7 +1664,7 @@ export function renderNotFoundPage({ slug = '', domain = 's.ten.my.id' }) {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
-      padding: 40px 30px;
+      padding: 40px 24px;
       text-align: center;
       max-width: 440px;
       width: 100%;
