@@ -23,6 +23,7 @@ const BASE_STYLES = `
     --danger-bg: rgba(248, 113, 113, 0.1);
     --success: #34d399;
     --success-bg: rgba(52, 211, 153, 0.1);
+    --warning: #fbbf24;
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
@@ -320,11 +321,10 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       font-weight: 700;
       letter-spacing: -0.01em;
     }
-    .nav-user {
+    .nav-actions {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 0.85rem;
     }
     .user-pill {
       background: var(--bg-input);
@@ -332,6 +332,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       padding: 4px 10px;
       border-radius: 20px;
       color: var(--text-muted);
+      font-size: 0.82rem;
     }
     .btn-logout {
       background: transparent;
@@ -354,40 +355,37 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       padding: 0 20px;
     }
 
-    /* Create Card */
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 22px;
-      margin-bottom: 24px;
-    }
-    .card-title {
-      font-size: 1rem;
+    /* Buttons */
+    .btn-primary {
+      background: var(--accent);
+      color: #0b1120;
       font-weight: 600;
-      margin-bottom: 16px;
-      display: flex;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      font-size: 0.88rem;
+      white-space: nowrap;
     }
-    .create-grid {
-      display: grid;
-      grid-template-columns: 2fr 1.5fr 1fr auto;
-      gap: 12px;
-      align-items: flex-end;
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      color: #fff;
     }
-    @media (max-width: 860px) {
-      .create-grid {
-        grid-template-columns: 1fr;
-      }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
+
+    /* Form Elements */
     .form-group {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
     label {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 500;
       color: var(--text-muted);
     }
@@ -405,12 +403,18 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       border-color: var(--border-focus);
       box-shadow: 0 0 0 3px var(--accent-glow);
     }
+    .input-field.input-error {
+      border-color: var(--danger);
+    }
+    .input-field.input-success {
+      border-color: var(--success);
+    }
     .input-group {
       display: flex;
       align-items: stretch;
     }
     .input-addon {
-      background: var(--bg-input);
+      background: var(--bg-surface-hover);
       border: 1px solid var(--border-color);
       border-right: none;
       color: var(--text-dim);
@@ -429,26 +433,15 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       border: 1px solid var(--border-color);
       border-left: none;
       color: var(--text-muted);
-      padding: 0 10px;
+      padding: 0 12px;
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .btn-dice:hover {
       background: var(--border-color);
-      color: #fff;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: #0b1120;
-      font-weight: 600;
-      border: none;
-      padding: 10px 18px;
-      border-radius: var(--radius-sm);
-      height: 40px;
-      white-space: nowrap;
-    }
-    .btn-primary:hover {
-      background: var(--accent-hover);
       color: #fff;
     }
 
@@ -461,8 +454,20 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       gap: 14px;
       margin-bottom: 16px;
     }
+    .toolbar-left {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
     .search-box {
-      min-width: 260px;
+      min-width: 240px;
       position: relative;
     }
     .search-input {
@@ -514,6 +519,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       color: var(--text-dim);
       display: flex;
       gap: 12px;
+      align-items: center;
     }
     .stats-highlight {
       color: var(--text-muted);
@@ -645,11 +651,11 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       margin-bottom: 8px;
     }
 
-    /* Modal */
+    /* Modals */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(4px);
       z-index: 500;
       display: none;
@@ -666,32 +672,40 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       border-radius: var(--radius-lg);
       padding: 24px;
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
       box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      animation: modal-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes modal-pop {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
     }
     .modal-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
     .modal-title {
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       font-weight: 600;
+      letter-spacing: -0.01em;
     }
     .btn-close {
       background: transparent;
       border: none;
       color: var(--text-dim);
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
-    .btn-close:hover { color: var(--text-main); }
+    .btn-close:hover { color: var(--text-main); background: var(--bg-surface-hover); }
     .modal-actions {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
-      margin-top: 20px;
+      margin-top: 24px;
     }
     .btn-secondary {
       background: transparent;
@@ -701,6 +715,23 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       border-radius: var(--radius-sm);
     }
     .btn-secondary:hover { background: var(--bg-surface-hover); color: var(--text-main); }
+
+    /* Quick category chips */
+    .chip {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .chip:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+      border-color: var(--border-focus);
+    }
 
     /* QR Code Container */
     #qr-container {
@@ -728,7 +759,11 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
         <div class="brand-badge">S</div>
         <div class="brand-name">${domain}</div>
       </a>
-      <div class="nav-user">
+      <div class="nav-actions">
+        <button id="btn-nav-create" class="btn-primary" onclick="openCreateModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          + Buat Shortlink
+        </button>
         <span class="user-pill">${userEmail || 'Admin'}</span>
         <button id="btn-logout" class="btn-logout" title="Keluar">Keluar</button>
       </div>
@@ -736,52 +771,23 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
   </header>
 
   <main class="container">
-    <!-- Quick Create Shortlink -->
-    <section class="card">
-      <div class="card-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        Buat Shortlink Baru
-      </div>
-
-      <form id="create-form" class="create-grid">
-        <div class="form-group">
-          <label for="input-url">URL Tujuan / Asset *</label>
-          <input type="url" id="input-url" class="input-field" required placeholder="https://domain.com/link-panjang-atau-asset.png" autocomplete="off">
-        </div>
-
-        <div class="form-group">
-          <label for="input-slug">Custom Slug (Opsional)</label>
-          <div class="input-group">
-            <span class="input-addon">${domain}/</span>
-            <input type="text" id="input-slug" class="input-field" placeholder="acak jika kosong" pattern="[a-zA-Z0-9-_]+" autocomplete="off">
-            <button type="button" id="btn-dice" class="btn-dice" title="Buat slug acak">🎲</button>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="input-category">Kategori</label>
-          <input type="text" id="input-category" list="category-list" class="input-field" placeholder="Contoh: CDN, Asset, Umum" autocomplete="off">
-          <datalist id="category-list"></datalist>
-        </div>
-
-        <button type="submit" id="btn-create" class="btn-primary">+ Buat Link</button>
-      </form>
-    </section>
-
     <!-- Toolbar: Search & Category Filter -->
     <div class="toolbar">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="search-input" class="search-input" placeholder="Cari slug, url, kategori...">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" class="search-input" placeholder="Cari slug, url, kategori...">
+        </div>
+        <div class="cat-filters" id="cat-filters">
+          <button class="cat-pill active" data-cat="ALL">Semua</button>
+        </div>
       </div>
 
-      <div class="cat-filters" id="cat-filters">
-        <button class="cat-pill active" data-cat="ALL">Semua</button>
-      </div>
-
-      <div class="stats-info">
-        <span>Total: <span id="stat-total" class="stats-highlight">0</span></span>
-        <span>Klik: <span id="stat-clicks" class="stats-highlight">0</span></span>
+      <div class="toolbar-right">
+        <div class="stats-info">
+          <span>Total: <span id="stat-total" class="stats-highlight">0</span></span>
+          <span>Klik: <span id="stat-clicks" class="stats-highlight">0</span></span>
+        </div>
       </div>
     </div>
 
@@ -809,6 +815,54 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       </table>
     </div>
   </main>
+
+  <!-- Create Modal (Popup Form) -->
+  <div id="create-modal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Buat Shortlink Baru</h3>
+          <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 2px;">Format tautan: ${domain}/[slug]</div>
+        </div>
+        <button type="button" class="btn-close" onclick="closeCreateModal()">&times;</button>
+      </div>
+
+      <form id="create-modal-form">
+        <!-- URL Tujuan -->
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label for="modal-input-url">URL Tujuan / Asset *</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="url" id="modal-input-url" class="input-field" required placeholder="https://domain.com/file-panjang.pdf" autocomplete="off">
+            <button type="button" class="btn-secondary" id="btn-paste-url" title="Tempel dari Clipboard" style="white-space: nowrap; padding: 0 10px; font-size: 0.8rem;">📋 Tempel</button>
+          </div>
+        </div>
+
+        <!-- Slug (Otomatis & Bisa Kustom) -->
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label for="modal-input-slug">Slug Shortlink * <span style="font-weight: normal; color: var(--text-dim);">(Acak otomatis, bisa diubah)</span></label>
+          <div class="input-group">
+            <span class="input-addon">${domain}/</span>
+            <input type="text" id="modal-input-slug" class="input-field" required placeholder="slug-unik" pattern="[a-zA-Z0-9-_]+" autocomplete="off">
+            <button type="button" id="btn-dice-modal" class="btn-dice" title="Acak slug baru">🎲</button>
+          </div>
+          <div id="slug-feedback" style="font-size: 0.76rem; margin-top: 4px; min-height: 18px;"></div>
+        </div>
+
+        <!-- Kategori -->
+        <div class="form-group" style="margin-bottom: 8px;">
+          <label for="modal-input-category">Kategori <span style="font-weight: normal; color: var(--text-dim);">(Opsional)</span></label>
+          <input type="text" id="modal-input-category" list="category-list" class="input-field" placeholder="Contoh: CDN, Asset, Social, Dokumen" autocomplete="off">
+          <datalist id="category-list"></datalist>
+          <div id="quick-category-chips" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeCreateModal()">Batal</button>
+          <button type="submit" id="btn-submit-modal-create" class="btn-primary">+ Buat Shortlink</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Edit Modal -->
   <div id="edit-modal" class="modal-backdrop">
@@ -854,6 +908,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
 
   <script>
     const DOMAIN = '${domain}';
+    const RESERVED_SLUGS = new Set(['login', 'logout', 'admin', 'api', 'favicon.ico', 'robots.txt', 'health', 'static', 'assets', 'public']);
     let allLinks = [];
     let activeCategory = 'ALL';
     let searchQuery = '';
@@ -879,7 +934,6 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
         await navigator.clipboard.writeText(text);
         showToast(customMsg, 'success');
       } catch (e) {
-        // Fallback
         const ta = document.createElement('textarea');
         ta.value = text;
         document.body.appendChild(ta);
@@ -961,6 +1015,21 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
         opt.value = cat;
         datalist.appendChild(opt);
       }
+
+      // Quick chips in modal
+      const chipsBox = document.getElementById('quick-category-chips');
+      chipsBox.innerHTML = '';
+      const defaultChips = ['CDN', 'Asset', 'Social', 'Dokumen', 'Umum'];
+      const combined = Array.from(new Set([...Object.keys(catCount), ...defaultChips])).slice(0, 7);
+      for (const cat of combined) {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = '+ ' + cat;
+        chip.onclick = () => {
+          document.getElementById('modal-input-category').value = cat;
+        };
+        chipsBox.appendChild(chip);
+      }
     }
 
     // Render Table
@@ -1040,27 +1109,134 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    // Random slug helper
-    function generateRandomSlug() {
+    // Generate random slug guaranteed unique against loaded allLinks
+    function generateUniqueRandomSlug(len = 6) {
       const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
-      let res = '';
-      for (let i = 0; i < 6; i++) {
-        res += chars[Math.floor(Math.random() * chars.length)];
+      for (let attempt = 0; attempt < 50; attempt++) {
+        let res = '';
+        for (let i = 0; i < len; i++) {
+          res += chars[Math.floor(Math.random() * chars.length)];
+        }
+        const lower = res.toLowerCase();
+        if (!RESERVED_SLUGS.has(lower) && !allLinks.some(l => (l.slug || '').toLowerCase() === lower)) {
+          return res;
+        }
       }
-      return res;
+      return 's' + Math.random().toString(36).substring(2, 7);
     }
 
-    document.getElementById('btn-dice').addEventListener('click', () => {
-      document.getElementById('input-slug').value = generateRandomSlug();
+    // Validate slug in real time
+    function validateSlug(slug) {
+      const trimmed = (slug || '').trim().toLowerCase();
+      const feedback = document.getElementById('slug-feedback');
+      const input = document.getElementById('modal-input-slug');
+      const submitBtn = document.getElementById('btn-submit-modal-create');
+
+      if (!trimmed) {
+        feedback.innerHTML = '<span style="color: var(--danger);">⚠️ Slug tidak boleh kosong.</span>';
+        input.classList.add('input-error');
+        input.classList.remove('input-success');
+        submitBtn.disabled = true;
+        return false;
+      }
+
+      if (trimmed.length < 2 || trimmed.length > 64) {
+        feedback.innerHTML = '<span style="color: var(--danger);">⚠️ Panjang slug harus antara 2 - 64 karakter.</span>';
+        input.classList.add('input-error');
+        input.classList.remove('input-success');
+        submitBtn.disabled = true;
+        return false;
+      }
+
+      if (!/^[a-zA-Z0-9-_]+$/.test(trimmed)) {
+        feedback.innerHTML = '<span style="color: var(--danger);">⚠️ Hanya diperbolehkan huruf, angka, tanda hubung (-), dan underscore (_).</span>';
+        input.classList.add('input-error');
+        input.classList.remove('input-success');
+        submitBtn.disabled = true;
+        return false;
+      }
+
+      if (RESERVED_SLUGS.has(trimmed)) {
+        feedback.innerHTML = '<span style="color: var(--danger);">❌ Slug "' + escapeHtml(trimmed) + '" merupakan nama sistem yang dilindungi.</span>';
+        input.classList.add('input-error');
+        input.classList.remove('input-success');
+        submitBtn.disabled = true;
+        return false;
+      }
+
+      // Check duplicates
+      const isDuplicate = allLinks.some(l => (l.slug || '').toLowerCase() === trimmed);
+      if (isDuplicate) {
+        feedback.innerHTML = '<span style="color: var(--danger);">❌ Slug "' + escapeHtml(trimmed) + '" sudah digunakan! Pilih slug lain.</span>';
+        input.classList.add('input-error');
+        input.classList.remove('input-success');
+        submitBtn.disabled = true;
+        return false;
+      }
+
+      feedback.innerHTML = '<span style="color: var(--success);">✅ Slug tersedia</span>';
+      input.classList.remove('input-error');
+      input.classList.add('input-success');
+      submitBtn.disabled = false;
+      return true;
+    }
+
+    // Open Create Modal
+    function openCreateModal() {
+      document.getElementById('modal-input-url').value = '';
+      document.getElementById('modal-input-category').value = '';
+      
+      const uniqueSlug = generateUniqueRandomSlug(6);
+      const slugInput = document.getElementById('modal-input-slug');
+      slugInput.value = uniqueSlug;
+      validateSlug(uniqueSlug);
+
+      document.getElementById('create-modal').classList.add('open');
+      setTimeout(() => document.getElementById('modal-input-url').focus(), 50);
+    }
+
+    // Close Create Modal
+    function closeCreateModal() {
+      document.getElementById('create-modal').classList.remove('open');
+    }
+
+    // Dice Button inside Modal
+    document.getElementById('btn-dice-modal').addEventListener('click', () => {
+      const newSlug = generateUniqueRandomSlug(6);
+      document.getElementById('modal-input-slug').value = newSlug;
+      validateSlug(newSlug);
     });
 
-    // Create Link
-    document.getElementById('create-form').addEventListener('submit', async (e) => {
+    // Real-time Slug Input Listener
+    document.getElementById('modal-input-slug').addEventListener('input', (e) => {
+      validateSlug(e.target.value);
+    });
+
+    // Paste URL Button
+    document.getElementById('btn-paste-url').addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          document.getElementById('modal-input-url').value = text.trim();
+          showToast('URL berhasil ditempel');
+        }
+      } catch (err) {
+        document.getElementById('modal-input-url').focus();
+        showToast('Tekan Ctrl+V untuk menempel URL', 'error');
+      }
+    });
+
+    // Create Shortlink Submit
+    document.getElementById('create-modal-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = document.getElementById('btn-create');
-      const url = document.getElementById('input-url').value.trim();
-      const customSlug = document.getElementById('input-slug').value.trim();
-      const category = document.getElementById('input-category').value.trim();
+      const btn = document.getElementById('btn-submit-modal-create');
+      const url = document.getElementById('modal-input-url').value.trim();
+      const customSlug = document.getElementById('modal-input-slug').value.trim();
+      const category = document.getElementById('modal-input-category').value.trim();
+
+      if (!validateSlug(customSlug)) {
+        return;
+      }
 
       btn.disabled = true;
       btn.textContent = 'Menyimpan...';
@@ -1075,7 +1251,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
         const data = await res.json();
         if (res.ok && data.success) {
           showToast('Shortlink /' + data.link.slug + ' berhasil dibuat!');
-          document.getElementById('create-form').reset();
+          closeCreateModal();
           await fetchLinks();
         } else {
           showToast(data.message || 'Gagal membuat shortlink', 'error');
@@ -1084,7 +1260,7 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
         showToast('Terjadi kesalahan jaringan', 'error');
       } finally {
         btn.disabled = false;
-        btn.textContent = '+ Buat Link';
+        btn.textContent = '+ Buat Shortlink';
       }
     });
 
@@ -1164,7 +1340,6 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
       const container = document.getElementById('qr-container');
       container.innerHTML = '';
 
-      // Generate QR using SVG via Google Charts API or quick SVG QR generator
       const qrImg = document.createElement('img');
       qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(fullUrl);
       qrImg.alt = 'QR Code ' + slug;
@@ -1183,6 +1358,25 @@ export function renderAdminPage({ domain = 's.ten.my.id', userEmail = '' }) {
     function closeQrModal() {
       document.getElementById('qr-modal').classList.remove('open');
     }
+
+    // Close modals with Escape key or clicking backdrop
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCreateModal();
+        closeEditModal();
+        closeQrModal();
+      }
+    });
+
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) {
+          closeCreateModal();
+          closeEditModal();
+          closeQrModal();
+        }
+      });
+    });
 
     // Logout
     document.getElementById('btn-logout').addEventListener('click', async () => {
