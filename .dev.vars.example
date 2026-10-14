@@ -1,0 +1,8 @@
+# Cloudflare Worker Environment Variables
+# Copy to .dev.vars for local testing (wrangler dev)
+# Set these in Cloudflare Dashboard: Workers & Pages -> s-ten-my-id -> Settings -> Variables
+
+ADMIN_EMAIL="admin@ten.my.id"
+ADMIN_PASSWORD="super-secret-password"
+SESSION_SECRET="change-this-to-a-random-secure-secret-key"
+DEFAULT_DOMAIN="s.ten.my.id"

@@ -1,0 +1,16 @@
+name = "s-ten-my-id"
+main = "src/index.js"
+compatibility_date = "2024-10-01"
+
+# KV Namespace Binding
+[[kv_namespaces]]
+binding = "DB_KV"
+id = "90962425ca2b4ad9a35962afc35f3690"
+
+[vars]
+DEFAULT_DOMAIN = "s.ten.my.id"
+
+# To bind custom domain s.ten.my.id directly:
+# routes = [
+#   { pattern = "s.ten.my.id/*", zone_name = "ten.my.id" }
+# ]
