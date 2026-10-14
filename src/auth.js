@@ -195,18 +195,47 @@ export function getAdminCredentials(env) {
 }
 
 /**
+ * Resolve admin credentials from env (Secrets) or persistent KV store
+ */
+export async function resolveAdminCredentials(env) {
+  // 1. Check env first (e.g. Cloudflare Dashboard Secrets)
+  const envCreds = getAdminCredentials(env);
+  if (envCreds.email && envCreds.password) {
+    return { ...envCreds, source: 'env' };
+  }
+
+  // 2. Check persistent KV database (config:admin)
+  if (env && env.DB_KV) {
+    try {
+      const kvData = await env.DB_KV.get('config:admin', 'json');
+      if (kvData && kvData.email && kvData.password) {
+        return {
+          email: String(kvData.email).trim(),
+          password: String(kvData.password).trim(),
+          source: 'kv'
+        };
+      }
+    } catch (err) {
+      // ignore
+    }
+  }
+
+  return { email: '', password: '', source: 'none' };
+}
+
+/**
  * Validate admin credentials
  */
-export function validateCredentials(email, password, env) {
-  const { email: adminEmail, password: adminPassword } = getAdminCredentials(env);
+export async function validateCredentials(email, password, env) {
+  const { email: adminEmail, password: adminPassword, source } = await resolveAdminCredentials(env);
 
-  // If env variables are not configured in Cloudflare Dashboard
+  // If credentials are not configured anywhere yet
   if (!adminEmail || !adminPassword) {
-    const presentKeys = Object.keys(env || {}).filter(k => k !== 'DB_KV');
     return {
       valid: false,
       configured: false,
-      message: `Variabel belum terbaca di worker aktif (Kunci di runtime: [${presentKeys.join(', ')}]). Silakan klik Deploy/Redeploy di Cloudflare Dashboard agar variabel baru diterapkan.`
+      source: 'none',
+      message: 'Kredensial admin belum dikonfigurasi. Silakan inisialisasi akun admin atau atur Secret di Cloudflare.'
     };
   }
 
@@ -214,12 +243,14 @@ export function validateCredentials(email, password, env) {
   const passMatch = safeEqual(password, adminPassword);
 
   if (emailMatch && passMatch) {
-    return { valid: true, configured: true };
+    return { valid: true, configured: true, source };
   }
 
   return {
     valid: false,
     configured: true,
+    source,
     message: 'Email atau password salah.'
   };
 }
+

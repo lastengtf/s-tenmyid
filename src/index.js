@@ -6,7 +6,7 @@
 import {
   authenticateRequest,
   validateCredentials,
-  getAdminCredentials,
+  resolveAdminCredentials,
   createSessionToken,
   createSessionCookie,
   createClearSessionCookie
@@ -50,19 +50,62 @@ export default {
       }
 
       if (path === '/health') {
-        const { email: adminEmail, password: adminPassword } = getAdminCredentials(env);
+        const creds = await resolveAdminCredentials(env);
         const safeEnvKeys = Object.keys(env || {}).filter(k => k !== 'DB_KV');
         return Response.json({
           status: 'ok',
           domain,
           detectedEnvKeys: safeEnvKeys,
-          hasAdminEmail: Boolean(adminEmail),
-          hasAdminPassword: Boolean(adminPassword),
+          adminConfigured: Boolean(creds.email && creds.password),
+          adminSource: creds.source,
           time: new Date().toISOString()
         });
       }
 
       // 2. Authentication API routes
+      if (path === '/api/auth/setup' && method === 'POST') {
+        const existing = await resolveAdminCredentials(env);
+        if (existing.email && existing.password) {
+          return Response.json({ success: false, message: 'Akun admin sudah pernah dikonfigurasi.' }, { status: 400 });
+        }
+
+        let body;
+        try {
+          body = await request.json();
+        } catch (e) {
+          return Response.json({ success: false, message: 'Invalid JSON body' }, { status: 400 });
+        }
+
+        const { email, password } = body || {};
+        if (!email || !password) {
+          return Response.json({ success: false, message: 'Email dan password wajib diisi.' }, { status: 400 });
+        }
+
+        const cleanEmail = String(email).trim().toLowerCase();
+        const cleanPassword = String(password).trim();
+        if (cleanPassword.length < 5) {
+          return Response.json({ success: false, message: 'Password minimal 5 karakter.' }, { status: 400 });
+        }
+
+        // Store permanently in Cloudflare KV
+        if (env && env.DB_KV) {
+          await env.DB_KV.put('config:admin', JSON.stringify({
+            email: cleanEmail,
+            password: cleanPassword,
+            createdAt: Date.now()
+          }));
+        }
+
+        const token = await createSessionToken(cleanEmail, env);
+        return new Response(JSON.stringify({ success: true, email: cleanEmail }), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Set-Cookie': createSessionCookie(token)
+          }
+        });
+      }
+
       if (path === '/api/auth/login' && method === 'POST') {
         let body;
         try {
@@ -76,7 +119,7 @@ export default {
           return Response.json({ success: false, message: 'Email dan password wajib diisi.' }, { status: 400 });
         }
 
-        const check = validateCredentials(email, password, env);
+        const check = await validateCredentials(email, password, env);
         if (!check.valid) {
           return Response.json({ success: false, message: check.message }, { status: 401 });
         }
@@ -115,7 +158,9 @@ export default {
         if (session) {
           return Response.redirect(`${url.origin}/admin`, 302);
         }
-        return new Response(renderLoginPage({ domain }), {
+        const creds = await resolveAdminCredentials(env);
+        const isConfigured = Boolean(creds.email && creds.password);
+        return new Response(renderLoginPage({ domain, isConfigured }), {
           headers: { 'Content-Type': 'text/html; charset=utf-8' }
         });
       }

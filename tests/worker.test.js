@@ -91,13 +91,13 @@ test('Slug & URL Validation', () => {
 
 test('Auth: Credentials and Sessions', async () => {
   // Validate credentials
-  const valid = validateCredentials('admin@ten.my.id', 'test-secret-password', mockEnv);
+  const valid = await validateCredentials('admin@ten.my.id', 'test-secret-password', mockEnv);
   assert.equal(valid.valid, true);
 
-  const invalidPass = validateCredentials('admin@ten.my.id', 'wrong-pass', mockEnv);
+  const invalidPass = await validateCredentials('admin@ten.my.id', 'wrong-pass', mockEnv);
   assert.equal(invalidPass.valid, false);
 
-  const invalidEmail = validateCredentials('other@ten.my.id', 'test-secret-password', mockEnv);
+  const invalidEmail = await validateCredentials('other@ten.my.id', 'test-secret-password', mockEnv);
   assert.equal(invalidEmail.valid, false);
 
   // Token creation & verification
@@ -229,4 +229,24 @@ test('Worker Fetch: Route Handling & Redirects', async () => {
   assert.equal(notFoundRes.status, 404);
   const notFoundHtml = await notFoundRes.text();
   assert.ok(notFoundHtml.includes('Tautan Tidak Ditemukan'));
+
+  // 9. Test First-time Admin Setup via KV
+  const freshKV = new MockKV();
+  const emptyEnv = { DB_KV: freshKV };
+  const setupRes = await worker.fetch(new Request('https://s.ten.my.id/api/auth/setup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'owner@ten.my.id', password: 'secure-owner-pass' })
+  }), emptyEnv);
+  assert.equal(setupRes.status, 200);
+  const setupCookie = setupRes.headers.get('Set-Cookie');
+  assert.ok(setupCookie.includes('s_session='));
+
+  // Duplicate setup must be rejected
+  const dupSetup = await worker.fetch(new Request('https://s.ten.my.id/api/auth/setup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'hacker@ten.my.id', password: 'hack' })
+  }), emptyEnv);
+  assert.equal(dupSetup.status, 400);
 });

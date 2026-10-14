@@ -86,13 +86,19 @@ const BASE_STYLES = `
 /**
  * Render Login Page
  */
-export function renderLoginPage({ error = '', domain = 's.ten.my.id' }) {
+export function renderLoginPage({ error = '', domain = 's.ten.my.id', isConfigured = true }) {
+  const isSetup = !isConfigured;
+  const title = isSetup ? 'Inisialisasi Admin' : 'Login';
+  const subtitle = isSetup ? 'Buat akun admin (disimpan permanen di Cloudflare KV)' : 'Personal URL Shortener';
+  const btnText = isSetup ? 'Simpan & Masuk' : 'Masuk';
+  const apiUrl = isSetup ? '/api/auth/setup' : '/api/auth/login';
+
   return `<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - ${domain}</title>
+  <title>${title} - ${domain}</title>
   <style>
     ${BASE_STYLES}
     body {
@@ -136,6 +142,17 @@ export function renderLoginPage({ error = '', domain = 's.ten.my.id' }) {
     .brand-sub {
       font-size: 0.8rem;
       color: var(--text-muted);
+    }
+    .setup-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      font-weight: 600;
     }
     .form-group {
       margin-bottom: 18px;
@@ -203,33 +220,35 @@ export function renderLoginPage({ error = '', domain = 's.ten.my.id' }) {
       <div class="brand-logo">S</div>
       <div>
         <div class="brand-title">${domain}</div>
-        <div class="brand-sub">Personal URL Shortener</div>
+        <div class="brand-sub">${subtitle}</div>
       </div>
     </div>
 
+    ${isSetup ? '<div class="setup-badge">⭐ Inisialisasi Akun Admin</div>' : ''}
     <div id="error-box" class="alert-error">${error}</div>
 
-    <form id="login-form">
+    <form id="auth-form">
       <div class="form-group">
-        <label for="email">Email</label>
+        <label for="email">Email Admin</label>
         <input type="email" id="email" name="email" class="input-field" required placeholder="admin@domain.com" autofocus autocomplete="username">
       </div>
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" class="input-field" required placeholder="••••••••" autocomplete="current-password">
+        <input type="password" id="password" name="password" class="input-field" required placeholder="••••••••" autocomplete="${isSetup ? 'new-password' : 'current-password'}">
       </div>
-      <button type="submit" id="btn-submit" class="btn-submit">Masuk</button>
+      <button type="submit" id="btn-submit" class="btn-submit">${btnText}</button>
     </form>
 
     <div class="footer-note">
-      Sistem autentikasi Cloudflare Variables
+      ${isSetup ? 'Kredensial disimpan permanen di Cloudflare KV' : 'Sistem autentikasi Cloudflare KV & Secrets'}
     </div>
   </div>
 
   <script>
-    const form = document.getElementById('login-form');
+    const form = document.getElementById('auth-form');
     const btn = document.getElementById('btn-submit');
     const errorBox = document.getElementById('error-box');
+    const API_URL = '${apiUrl}';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -241,7 +260,7 @@ export function renderLoginPage({ error = '', domain = 's.ten.my.id' }) {
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
 
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -251,16 +270,16 @@ export function renderLoginPage({ error = '', domain = 's.ten.my.id' }) {
         if (res.ok && data.success) {
           window.location.href = '/admin';
         } else {
-          errorBox.textContent = data.message || 'Login gagal. Periksa kembali email dan password.';
+          errorBox.textContent = data.message || 'Gagal memproses. Periksa kembali input Anda.';
           errorBox.style.display = 'block';
           btn.disabled = false;
-          btn.textContent = 'Masuk';
+          btn.textContent = '${btnText}';
         }
       } catch (err) {
         errorBox.textContent = 'Terjadi kesalahan jaringan. Silakan coba lagi.';
         errorBox.style.display = 'block';
         btn.disabled = false;
-        btn.textContent = 'Masuk';
+        btn.textContent = '${btnText}';
       }
     });
   </script>
