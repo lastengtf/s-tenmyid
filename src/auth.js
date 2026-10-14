@@ -163,18 +163,50 @@ export async function authenticateRequest(request, env) {
 }
 
 /**
+ * Extract admin credentials flexibly from env
+ */
+export function getAdminCredentials(env) {
+  if (!env) return { email: '', password: '' };
+
+  let email = env.ADMIN_EMAIL || env.admin_email || env.EMAIL || env.email || '';
+  if (!email) {
+    for (const key of Object.keys(env)) {
+      if (key.toLowerCase().includes('email')) {
+        email = String(env[key]);
+        break;
+      }
+    }
+  }
+
+  let password = env.ADMIN_PASSWORD || env.admin_password || env.PASSWORD || env.password || env.ADMIN_PASS || env.admin_pass || '';
+  if (!password) {
+    for (const key of Object.keys(env)) {
+      if (key.toLowerCase().includes('pass')) {
+        password = String(env[key]);
+        break;
+      }
+    }
+  }
+
+  return {
+    email: String(email || '').trim(),
+    password: String(password || '').trim()
+  };
+}
+
+/**
  * Validate admin credentials
  */
 export function validateCredentials(email, password, env) {
-  const adminEmail = (env.ADMIN_EMAIL || '').trim();
-  const adminPassword = (env.ADMIN_PASSWORD || '').trim();
+  const { email: adminEmail, password: adminPassword } = getAdminCredentials(env);
 
   // If env variables are not configured in Cloudflare Dashboard
   if (!adminEmail || !adminPassword) {
+    const presentKeys = Object.keys(env || {}).filter(k => k !== 'DB_KV');
     return {
       valid: false,
       configured: false,
-      message: 'ADMIN_EMAIL atau ADMIN_PASSWORD belum diatur di Cloudflare Dashboard Settings > Variables.'
+      message: `Variabel belum terbaca di worker aktif (Kunci di runtime: [${presentKeys.join(', ')}]). Silakan klik Deploy/Redeploy di Cloudflare Dashboard agar variabel baru diterapkan.`
     };
   }
 

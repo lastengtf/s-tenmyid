@@ -6,6 +6,7 @@
 import {
   authenticateRequest,
   validateCredentials,
+  getAdminCredentials,
   createSessionToken,
   createSessionCookie,
   createClearSessionCookie
@@ -49,7 +50,16 @@ export default {
       }
 
       if (path === '/health') {
-        return Response.json({ status: 'ok', domain, time: new Date().toISOString() });
+        const { email: adminEmail, password: adminPassword } = getAdminCredentials(env);
+        const safeEnvKeys = Object.keys(env || {}).filter(k => k !== 'DB_KV');
+        return Response.json({
+          status: 'ok',
+          domain,
+          detectedEnvKeys: safeEnvKeys,
+          hasAdminEmail: Boolean(adminEmail),
+          hasAdminPassword: Boolean(adminPassword),
+          time: new Date().toISOString()
+        });
       }
 
       // 2. Authentication API routes
