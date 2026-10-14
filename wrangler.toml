@@ -8,8 +8,6 @@ binding = "DB_KV"
 id = "90962425ca2b4ad9a35962afc35f3690"
 preview_id = "90962425ca2b4ad9a35962afc35f3690"
 
-[vars]
-DEFAULT_DOMAIN = "s.ten.my.id"
 
 # To bind custom domain s.ten.my.id directly:
 # routes = [
