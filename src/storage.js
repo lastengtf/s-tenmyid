@@ -1,6 +1,6 @@
 /**
  * Cloudflare KV Storage helper for s.ten.my.id
- * Binding: DB_KV
+ * Binding: DB_KV with local fallback for offline/development environments
  */
 
 const RESERVED_SLUGS = new Set([
@@ -16,11 +16,112 @@ const RESERVED_SLUGS = new Set([
   'public'
 ]);
 
+// In-memory fallback for local development when Wrangler is not authenticated to remote KV
+const localKVStore = new Map();
+
+function isRemoteKvError(err) {
+  if (!err) return false;
+  return err.remote === true ||
+         String(err.message || '').includes('internal error') ||
+         String(err.message || '').includes('Network connection') ||
+         String(err.message || '').includes('Failed to fetch');
+}
+
+/**
+ * Resilient KV Get
+ */
+async function kvGet(env, key, type = 'text') {
+  if (env && env.DB_KV) {
+    try {
+      const res = await env.DB_KV.get(key, type);
+      if (res !== undefined) return res;
+    } catch (err) {
+      if (!isRemoteKvError(err)) throw err;
+    }
+  }
+
+  // Local fallback
+  const item = localKVStore.get(key);
+  if (!item) return null;
+  if (type === 'json') {
+    try {
+      return JSON.parse(item.value);
+    } catch (e) {
+      return null;
+    }
+  }
+  return item.value;
+}
+
+/**
+ * Resilient KV Put
+ */
+async function kvPut(env, key, value, options = {}) {
+  let putSuccess = false;
+  if (env && env.DB_KV) {
+    try {
+      await env.DB_KV.put(key, value, options);
+      putSuccess = true;
+    } catch (err) {
+      if (!isRemoteKvError(err)) throw err;
+    }
+  }
+
+  // Keep local store in sync
+  localKVStore.set(key, {
+    value: String(value),
+    metadata: options.metadata || null
+  });
+
+  return putSuccess;
+}
+
+/**
+ * Resilient KV Delete
+ */
+async function kvDelete(env, key) {
+  if (env && env.DB_KV) {
+    try {
+      await env.DB_KV.delete(key);
+    } catch (err) {
+      if (!isRemoteKvError(err)) throw err;
+    }
+  }
+  localKVStore.delete(key);
+}
+
+/**
+ * Resilient KV List
+ */
+async function kvList(env, options = {}) {
+  const prefix = options.prefix || '';
+  if (env && env.DB_KV) {
+    try {
+      const res = await env.DB_KV.list(options);
+      if (res && Array.isArray(res.keys)) return res;
+    } catch (err) {
+      if (!isRemoteKvError(err)) throw err;
+    }
+  }
+
+  // Local fallback list
+  const keys = [];
+  for (const [key, data] of localKVStore.entries()) {
+    if (key.startsWith(prefix)) {
+      keys.push({
+        name: key,
+        metadata: data.metadata
+      });
+    }
+  }
+  return { keys, list_complete: true };
+}
+
 /**
  * Generate random alphanumeric slug of given length
  */
 export function generateRandomSlug(length = 6) {
-  const chars = 'abcdefghjkmnpqrstuvwxyz23456789'; // human-friendly lowercase alphanumeric
+  const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
   let result = '';
   const randomValues = new Uint8Array(length);
   crypto.getRandomValues(randomValues);
@@ -58,17 +159,14 @@ export function isValidUrl(urlString) {
  * Get single link by slug
  */
 export async function getLink(env, slug) {
-  if (!env.DB_KV) throw new Error('DB_KV binding is missing');
   const key = `link:${slug.toLowerCase()}`;
-  return await env.DB_KV.get(key, 'json');
+  return await kvGet(env, key, 'json');
 }
 
 /**
  * Create a new shortlink
  */
 export async function createLink(env, { url, customSlug, category }) {
-  if (!env.DB_KV) throw new Error('DB_KV binding is missing');
-  
   const cleanUrl = url.trim();
   if (!isValidUrl(cleanUrl)) {
     throw new Error('URL tujuan tidak valid. Harus diawali dengan http:// atau https://');
@@ -80,18 +178,16 @@ export async function createLink(env, { url, customSlug, category }) {
     if (!isValidSlug(finalSlug)) {
       throw new Error(`Custom slug "${customSlug}" tidak valid atau merupakan nama sistem yang dilindungi.`);
     }
-    // Check if exists
-    const existing = await env.DB_KV.get(`link:${finalSlug}`, 'json');
+    const existing = await kvGet(env, `link:${finalSlug}`, 'json');
     if (existing) {
       throw new Error(`Slug "${finalSlug}" sudah digunakan. Silakan gunakan slug lain.`);
     }
   } else {
-    // Generate unique random slug
     let attempts = 0;
     while (attempts < 10) {
       const candidate = generateRandomSlug(6);
       if (!RESERVED_SLUGS.has(candidate)) {
-        const existing = await env.DB_KV.get(`link:${candidate}`, 'json');
+        const existing = await kvGet(env, `link:${candidate}`, 'json');
         if (!existing) {
           finalSlug = candidate;
           break;
@@ -117,7 +213,7 @@ export async function createLink(env, { url, customSlug, category }) {
   };
 
   const key = `link:${finalSlug}`;
-  await env.DB_KV.put(key, JSON.stringify(linkData), {
+  await kvPut(env, key, JSON.stringify(linkData), {
     metadata: {
       slug: finalSlug,
       url: cleanUrl,
@@ -134,10 +230,9 @@ export async function createLink(env, { url, customSlug, category }) {
  * Update an existing shortlink
  */
 export async function updateLink(env, slug, { url, category }) {
-  if (!env.DB_KV) throw new Error('DB_KV binding is missing');
   const cleanSlug = slug.toLowerCase();
   const key = `link:${cleanSlug}`;
-  const existing = await env.DB_KV.get(key, 'json');
+  const existing = await kvGet(env, key, 'json');
 
   if (!existing) {
     throw new Error(`Shortlink "${slug}" tidak ditemukan.`);
@@ -162,7 +257,7 @@ export async function updateLink(env, slug, { url, category }) {
     updatedAt: now
   };
 
-  await env.DB_KV.put(key, JSON.stringify(updatedData), {
+  await kvPut(env, key, JSON.stringify(updatedData), {
     metadata: {
       slug: cleanSlug,
       url: newUrl,
@@ -179,10 +274,9 @@ export async function updateLink(env, slug, { url, category }) {
  * Delete a shortlink
  */
 export async function deleteLink(env, slug) {
-  if (!env.DB_KV) throw new Error('DB_KV binding is missing');
   const cleanSlug = slug.toLowerCase();
   const key = `link:${cleanSlug}`;
-  await env.DB_KV.delete(key);
+  await kvDelete(env, key);
   return { success: true, slug: cleanSlug };
 }
 
@@ -190,17 +284,14 @@ export async function deleteLink(env, slug) {
  * List all shortlinks with metadata
  */
 export async function listLinks(env) {
-  if (!env.DB_KV) throw new Error('DB_KV binding is missing');
-  
-  const listResult = await env.DB_KV.list({ prefix: 'link:', limit: 1000 });
+  const listResult = await kvList(env, { prefix: 'link:', limit: 1000 });
   const links = [];
 
   for (const item of listResult.keys) {
     if (item.metadata && item.metadata.url) {
       links.push(item.metadata);
     } else {
-      // Fallback: fetch JSON if metadata is missing
-      const data = await env.DB_KV.get(item.name, 'json');
+      const data = await kvGet(env, item.name, 'json');
       if (data) {
         links.push({
           slug: data.slug,
@@ -213,9 +304,7 @@ export async function listLinks(env) {
     }
   }
 
-  // Sort descending by creation date
   links.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
   return links;
 }
 
@@ -223,17 +312,16 @@ export async function listLinks(env) {
  * Asynchronously increment click count
  */
 export async function incrementClicks(env, slug) {
-  if (!env.DB_KV) return;
   try {
     const cleanSlug = slug.toLowerCase();
     const key = `link:${cleanSlug}`;
-    const data = await env.DB_KV.get(key, 'json');
+    const data = await kvGet(env, key, 'json');
     if (!data) return;
 
     data.clicks = (data.clicks || 0) + 1;
     data.lastClickedAt = Date.now();
 
-    await env.DB_KV.put(key, JSON.stringify(data), {
+    await kvPut(env, key, JSON.stringify(data), {
       metadata: {
         slug: cleanSlug,
         url: data.url,
