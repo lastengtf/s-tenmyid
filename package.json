@@ -1,5 +1,5 @@
 {
-  "name": "s-ten-my-id",
+  "name": "s-tenmyid",
   "version": "1.0.0",
   "description": "Personal URL Shortener Platform for s.ten.my.id with Cloudflare Workers & KV",
   "type": "module",
